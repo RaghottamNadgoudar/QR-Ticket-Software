@@ -1,0 +1,33 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == 'raghottam.nadgoudar2@gmail.com';
+    }
+
+    // QR codes folder
+    match /qrcodes/{userId}/{filename} {
+      // Users can read their own QR codes
+      // Admin can read all QR codes
+      allow read: if isAdmin() || 
+        (isAuthenticated() && request.auth.uid == userId);
+      
+      // Users can upload their own QR codes
+      allow create: if isAuthenticated() && 
+        request.auth.uid == userId &&
+        request.resource.size < 5 * 1024 * 1024 && // 5MB max
+        request.resource.contentType.matches('image/.*');
+      
+      // No updates allowed, create new files instead
+      allow update: if false;
+      
+      // Only admin can delete QR codes
+      allow delete: if isAdmin();
+    }
+  }
+}

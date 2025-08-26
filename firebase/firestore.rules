@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Development-friendly admin check - replace with your admin email
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == 'raghottam.nadgoudar2@gmail.com';
+    }
+
+    function isAttendanceTaker() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/attendanceTakers/$(request.auth.uid));
+    }
+
+    function isAdminOrAttendanceTaker() {
+      return isAdmin() || isAttendanceTaker();
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Events collection
+    match /events/{eventId} {
+      // Allow anyone to read events (public)
+      allow read: if true;
+
+      // Only admin can create or delete events
+      allow create, delete: if isAdmin();
+
+      // Allow admin full updates. Allow authenticated users to only increment
+      // the `currentBookings` field by exactly 1 (used when a student books).
+      allow update: if isAdmin() || (
+        isAuthenticated() &&
+        // Allow other fields to remain unchanged
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentBookings']) &&
+        // Ensure the new value is exactly previous + 1
+        request.resource.data.currentBookings == resource.data.currentBookings + 1 &&
+        // Ensure all other fields remain the same
+        request.resource.data.name == resource.data.name &&
+        request.resource.data.venue == resource.data.venue &&
+        request.resource.data.clubName == resource.data.clubName &&
+        request.resource.data.eventSlot == resource.data.eventSlot &&
+        request.resource.data.maxLimit == resource.data.maxLimit
+      );
+    }
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      // Admin can read all bookings
+      // Students can only read their own bookings
+      allow read: if isAdmin() || 
+        (isAuthenticated() && resource.data.userId == request.auth.uid);
+      
+      // Students can create bookings for themselves if they haven't already booked the event
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        // Check if a booking already exists for this user and event
+        !exists(/databases/$(database)/documents/bookings/$(request.resource.data.userId + '_' + request.resource.data.eventId));
+      
+      // Only admin can update bookings (for attendance)
+      allow update: if isAdmin();
+      
+      // No one can delete bookings
+      allow delete: if false;
+    }
+
+    // Admin config document
+    match /config/admin {
+      allow read: if isAuthenticated();
+      allow write: if false;  // Only updateable through Firebase Console
+    }
+
+    // Attendance Takers collection
+    match /attendanceTakers/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Users collection - allow users to create/read/update their own profile
+    match /users/{userId} {
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAuthenticated() && request.auth.uid == userId || isAdminOrAttendanceTaker();
+      allow update: if isAuthenticated() && request.auth.uid == userId || isAdmin();
+      allow delete: if false;
+    }
+  }
+}
