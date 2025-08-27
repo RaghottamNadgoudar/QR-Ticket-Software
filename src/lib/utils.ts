@@ -1,5 +1,20 @@
 import { db } from './firebase';
-import { collection, getDocs, addDoc, updateDoc, doc, query, where, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { 
+  collection, 
+  getDocs, 
+  addDoc, 
+  updateDoc, 
+  doc, 
+  query, 
+  where, 
+  setDoc, 
+  serverTimestamp, 
+  getDoc, 
+  runTransaction, 
+  Transaction,
+  DocumentReference,
+  DocumentData
+} from 'firebase/firestore';
 import { Event, Booking } from './store';
 import QRCode from 'qrcode';
 import { jsPDF } from 'jspdf';
@@ -51,20 +66,136 @@ export const createEvent = async (eventData: Omit<Event, 'id' | 'currentBookings
   }
 };
 
-export const createBooking = async (userId: string, events: Event[]) => {
+export const createBooking = async (userId: string, events: Event[]): Promise<Booking[]> => {
+  const bookings: Booking[] = [];
+  
   try {
-    const bookingsRef = collection(db, 'bookings');
-    const bookings: Booking[] = [];
+    await runTransaction(db, async (transaction: Transaction) => {
+      for (const event of events) {
+        if (!event.id || !event.name) {
+          throw new Error('Invalid event data');
+        }
+        const bookingId = `${userId}_${event.id}`;
+        const bookingRef = doc(db, 'bookings', bookingId);
+        const eventRef = doc(db, 'events', event.id);
 
-    for (const event of events) {
-      // Create a deterministic document ID using userId and eventId
-      const bookingId = `${userId}_${event.id}`;
-      const bookingRef = doc(bookingsRef, bookingId);
+        // Check event exists and has capacity within transaction
+        const eventDoc = await transaction.get(eventRef);
+        if (!eventDoc.exists()) {
+          throw new Error(`Event ${event.name} no longer exists`);
+        }
 
-      // Check if booking already exists
-      const existingBooking = await getDoc(bookingRef);
-      if (existingBooking.exists()) {
-        throw new Error(`You have already booked event: ${event.name}`);
+        const eventData = eventDoc.data();
+        if (!eventData) {
+          throw new Error(`Invalid event data for ${event.name}`);
+        }
+
+        // Check capacity
+        const currentBookings = eventData.currentBookings || 0;
+        if (currentBookings >= eventData.maxLimit) {
+          throw new Error(`Event ${event.name} has reached its maximum capacity`);
+        }
+
+        // Check for existing booking
+        const existingBooking = await transaction.get(bookingRef);
+        if (existingBooking.exists()) {
+          throw new Error(`You have already booked event: ${event.name}`);
+        }
+
+        // Generate QR code with encrypted data
+        const qrCodeData = {
+          bookingId,
+          userId,
+          eventId: event.id,
+          timestamp: Date.now()
+        };
+        const qrCode = await generateQRCode(JSON.stringify(qrCodeData));
+
+        const bookingData = {
+          userId,
+          eventId: event.id,
+          eventName: event.name,
+          attended: false,
+          timestamp: serverTimestamp(),
+          qrCode,
+          maxLimit: eventData.maxLimit,
+          currentBookings: currentBookings + 1
+        };
+
+        // Update both documents atomically
+        transaction.set(bookingRef, bookingData);
+        transaction.update(eventRef, {
+          currentBookings: currentBookings + 1
+        });
+
+        bookings.push({
+          id: bookingId,
+          ...bookingData,
+          timestamp: new Date(),
+        } as Booking);
+      }
+    });
+
+    return bookings;
+  } catch (error) {
+    console.error('Error creating bookings:', error);
+    throw error;
+  }
+
+      for (const event of events) {
+        // Create a deterministic document ID using userId and eventId
+        const bookingId = `${userId}_${event.id}`;
+        const bookingRef = doc(bookingsRef, bookingId);
+        const eventRef = doc(db, 'events', event.id);
+
+        // Get the latest event data within the transaction
+        const eventDoc = await transaction.get(eventRef);
+        if (!eventDoc.exists()) {
+          throw new Error(`Event ${event.name} no longer exists`);
+        }
+
+        const currentEvent = { id: eventDoc.id, ...eventDoc.data() } as Event;
+        if (currentEvent.currentBookings >= currentEvent.maxLimit) {
+          throw new Error(`Event ${event.name} has reached its maximum capacity`);
+        }
+
+        // Check if booking already exists within the transaction
+        const existingBooking = await transaction.get(bookingRef);
+        if (existingBooking.exists()) {
+          throw new Error(`You have already booked event: ${event.name}`);
+        }
+
+        const bookingData = {
+          userId,
+          eventId: event.id,
+          eventName: event.name,
+          attended: false,
+          timestamp: serverTimestamp(),
+        };
+
+        const qrCode = await generateQRCode(bookingId);
+
+        // Set booking data within transaction
+        transaction.set(bookingRef, {
+          ...bookingData,
+          qrCode,
+        });
+
+        // Update event capacity within transaction
+        transaction.update(eventRef, {
+          currentBookings: currentEvent.currentBookings + 1
+        });
+
+        bookings.push({
+          id: bookingId,
+          ...bookingData,
+          qrCode,
+          timestamp: new Date(),
+        });
+      }
+    });
+
+    return bookings;
       }
 
       const bookingData = {

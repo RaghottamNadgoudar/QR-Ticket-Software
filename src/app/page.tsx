@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -17,9 +18,21 @@ export default function Home() {
   useEffect(() => {
     // One-time check on mount to redirect if already signed in.
     const user = auth.currentUser;
-    if (user?.email) {
-      const target = user.email === process.env.ADMIN_EMAIL ? '/admin' : '/student';
-      router.replace(target);
+    const checkUserRole = async (u: any) => {
+      if (!u?.email) return;
+      if (u.email === process.env.ADMIN_EMAIL) {
+        router.replace('/admin');
+        return;
+      }
+      // Check if user is an attendance taker
+      const takersRef = collection(db, 'attendanceTakers');
+      const q = query(takersRef, where('email', '==', u.email));
+      const snapshot = await getDocs(q);
+      router.replace(!snapshot.empty ? '/attendance-taker' : '/student');
+    };
+
+    if (user) {
+      checkUserRole(user);
     }
   }, [router]);
 
@@ -29,14 +42,6 @@ export default function Home() {
 
     try {
       const adminEmail = process.env.ADMIN_EMAIL;
-      
-      // Debug logs
-      console.log('Login Debug:', {
-        attemptEmail: email,
-        adminEmail,
-        isAdminAttempt: email === adminEmail,
-        allowedDomain: process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN
-      });
       
       // Check if email domain is allowed for non-admin users
       if (email !== adminEmail && 
@@ -48,16 +53,30 @@ export default function Home() {
 
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      // Ensure Firebase session is fully ready before navigating
+      // Ensure session is fully ready before role checks/navigation
       try {
         await user.reload();
         await user.getIdToken(true);
       } catch {}
-      const target = user.email === process.env.ADMIN_EMAIL ? '/admin' : '/student';
-      router.replace(target);
+
+      if (user.email === process.env.ADMIN_EMAIL) {
+        router.replace('/admin');
+      } else {
+        // Check if user is an attendance taker
+        const takersRef = collection(db, 'attendanceTakers');
+        const q = query(takersRef, where('email', '==', user.email));
+        const snapshot = await getDocs(q);
+        router.replace(!snapshot.empty ? '/attendance-taker' : '/student');
+      }
     } catch (error) {
       console.error('Error signing in:', error);
-      toast.error('Invalid credentials');
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+        toast.error('Invalid email or password');
+      } else if (error.code === 'auth/too-many-requests') {
+        toast.error('Too many failed attempts. Please try again later.');
+      } else {
+        toast.error('Failed to sign in. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
