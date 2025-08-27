@@ -19,6 +19,7 @@ export interface Booking {
   qrCode: string;
   attended: boolean;
   timestamp: Date;
+  attendanceTime?: Date;
 }
 
 interface EventStore {

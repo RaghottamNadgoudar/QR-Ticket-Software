@@ -42,8 +42,8 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onScan }) => {
         }
 
         if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
-          // @ts-ignore - some TS DOM libs don't include BarcodeDetector
-          detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+          // @ts-expect-error - BarcodeDetector is not in standard DOM types yet
+          detector = new window.BarcodeDetector({ formats: ['qr_code'] });
 
           const scanLoop = async () => {
             try {

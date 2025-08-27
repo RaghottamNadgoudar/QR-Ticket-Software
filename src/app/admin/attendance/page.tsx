@@ -185,35 +185,6 @@ export default function AttendancePage() {
     a.click();
   };
 
-  const exportAllAttendance = async () => {
-    try {
-      const bookingsRef = collection(db, 'bookings');
-      const snapshot = await getDocs(bookingsRef);
-      const allRecords = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-
-      const headers = ['Booking ID', 'Event ID', 'Event Name', 'User ID', 'Attended', 'Attendance Time'];
-      const rows = allRecords.map((r) => [
-        r.id,
-        r.eventId,
-        r.eventName,
-        r.userId,
-        r.attended ? 'Yes' : 'No',
-        r.attendanceTime ? new Date(r.attendanceTime.seconds ? r.attendanceTime.seconds * 1000 : r.attendanceTime).toLocaleString() : ''
-      ]);
-
-      const csv = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('href', url);
-      a.setAttribute('download', `attendance-all-events.csv`);
-      a.click();
-    } catch (error) {
-      console.error('Error exporting all attendance:', error);
-      toast.error('Failed to export all attendance');
-    }
-  };
-
   const exportAllEventsToSegmentedCSV = async () => {
     if (events.length === 0) {
       toast.error('No events available to export');
