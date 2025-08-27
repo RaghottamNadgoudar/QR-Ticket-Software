@@ -107,7 +107,7 @@ export const QrDiagnostics: React.FC = () => {
       
       {!diagnostics.hasBarcodeDetector && (
         <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-          <strong>⚠️ QR Scanner won't work:</strong> BarcodeDetector API is not available in this browser. 
+          <strong>⚠️ QR Scanner won&apos;t work:</strong> BarcodeDetector API is not available in this browser. 
           Please use Chrome or Edge on mobile devices.
         </div>
       )}

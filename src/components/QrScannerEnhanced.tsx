@@ -139,7 +139,7 @@ export const QrScannerEnhanced: React.FC<QrScannerProps> = ({ onScan }) => {
             <ul className="list-disc list-inside mt-1 space-y-1">
               <li>Use Chrome or Edge browser on mobile</li>
               <li>Allow camera permissions when prompted</li>
-              <li>Ensure you're on HTTPS (not HTTP)</li>
+              <li>Ensure you&apos;re on HTTPS (not HTTP)</li>
               <li>Try refreshing the page</li>
             </ul>
           </div>

@@ -175,7 +175,7 @@ export const QrScannerLib: React.FC<QrScannerLibProps> = ({ onScan }) => {
               <li>Close other apps using the camera</li>
               <li>Try refreshing the page</li>
               <li>Use Chrome or Safari on mobile</li>
-              <li>Ensure you're on HTTPS (not HTTP)</li>
+              <li>Ensure you&apos;re on HTTPS (not HTTP)</li>
             </ul>
           </div>
           <button 
