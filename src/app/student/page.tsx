@@ -193,8 +193,7 @@ export default function StudentEvents() {
                 <h3 className="mt-4 text-lg font-medium text-yellow-800 font-orbitron">Booking Limit Reached</h3>
                 <p className="mt-1 text-sm text-yellow-600">You have already booked the maximum number of events allowed.</p>
               </div>
-            ) : 
-            {filteredEvents.length === 0 ? (
+            ) : filteredEvents.length === 0 ? (
               <div className="text-center py-12">
                 <div className="mx-auto h-12 w-12 text-gray-400">
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
