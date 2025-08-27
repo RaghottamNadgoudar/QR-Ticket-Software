@@ -16,8 +16,10 @@ export function middleware(request: NextRequest) {
     const isAdmin = request.cookies.get('isAdmin')?.value === 'true';
     const isAttendanceTaker = request.cookies.get('isAttendanceTaker')?.value === 'true';
     
-    if (isAdmin || isAttendanceTaker) {
+    if (isAdmin) {
       return NextResponse.redirect(new URL('/admin', request.url));
+    } else if (isAttendanceTaker) {
+      return NextResponse.redirect(new URL('/attendance-takers', request.url));
     } else {
       return NextResponse.redirect(new URL('/student', request.url));
     }
@@ -28,18 +30,28 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // If trying to access admin path without admin privileges, check for attendance taker
-  if (path.startsWith('/admin') && request.cookies.get('isAdmin')?.value !== 'true' && request.cookies.get('isAttendanceTaker')?.value !== 'true') {
+  // If trying to access admin path without admin privileges
+  if (path.startsWith('/admin') && request.cookies.get('isAdmin')?.value !== 'true') {
+    // If they're an attendance taker, redirect to their page
+    if (request.cookies.get('isAttendanceTaker')?.value === 'true') {
+      return NextResponse.redirect(new URL('/attendance-takers', request.url));
+    }
+    // If they're a regular student, redirect to student page
     return NextResponse.redirect(new URL('/student', request.url));
   }
   
-  // If admin or attendance taker is trying to access student pages, redirect to admin
-  if (path.startsWith('/student') && (request.cookies.get('isAdmin')?.value === 'true' || request.cookies.get('isAttendanceTaker')?.value === 'true')) {
+  // If admin is trying to access student pages, redirect to admin
+  if (path.startsWith('/student') && request.cookies.get('isAdmin')?.value === 'true') {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
 
-  // If regular student is trying to access attendance-taker pages, redirect to student
-  if (path.startsWith('/attendance-taker') && request.cookies.get('isAttendanceTaker')?.value !== 'true' && request.cookies.get('isAdmin')?.value !== 'true') {
+  // If attendance taker is trying to access student pages, redirect to attendance-takers
+  if (path.startsWith('/student') && request.cookies.get('isAttendanceTaker')?.value === 'true') {
+    return NextResponse.redirect(new URL('/attendance-takers', request.url));
+  }
+
+  // If regular student is trying to access attendance-takers pages, redirect to student
+  if (path.startsWith('/attendance-takers') && request.cookies.get('isAttendanceTaker')?.value !== 'true' && request.cookies.get('isAdmin')?.value !== 'true') {
     return NextResponse.redirect(new URL('/student', request.url));
   }
 
@@ -54,7 +66,7 @@ export const config = {
     '/admin/:path*',
     '/student',
     '/student/:path*',
-    '/attendance-taker',
-    '/attendance-taker/:path*',
+    '/attendance-takers',
+    '/attendance-takers/:path*',
   ],
 };

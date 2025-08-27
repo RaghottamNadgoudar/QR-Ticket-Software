@@ -67,11 +67,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Only redirect if this is not the initial load, user just signed in, and we haven't redirected yet
         // Also check if we're not already on a valid user page
         const currentPath = window.location.pathname;
-        const isOnValidUserPage = currentPath.startsWith('/student') || currentPath.startsWith('/admin') || currentPath.startsWith('/attendance-taker');
+        const isOnValidUserPage = currentPath.startsWith('/student') || currentPath.startsWith('/admin') || currentPath.startsWith('/attendance-takers');
         
         if (!initialLoad && !hasRedirected && !isOnValidUserPage) {
-          if (isAdmin || attendanceTakerStatus.isAttendanceTaker) {
+          if (isAdmin) {
             router.push('/admin');
+          } else if (attendanceTakerStatus.isAttendanceTaker) {
+            router.push('/attendance-takers');
           } else {
             router.push('/student');
           }
