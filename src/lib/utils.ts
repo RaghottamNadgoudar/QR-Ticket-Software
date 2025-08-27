@@ -15,42 +15,52 @@ export const generateQRCode = async (data: string): Promise<string> => {
 
 export const generatePDF = async (bookings: Booking[]): Promise<Blob> => {
   const pdf = new jsPDF();
-  let yPos = 30;
+  let yPos = 40;
 
-  // Add title
-  pdf.setFontSize(16);
-  pdf.text('Event Tickets', 20, 20);
-  pdf.setFontSize(10);
-
+  // Set font to a more modern/tech-like font
+  pdf.setFont('helvetica', 'bold');
+  
+  // Add title with larger font and orange color
+  pdf.setFontSize(24);
+  pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
+  pdf.text('EVENT TICKETS', 20, 25);
+  
   for (const booking of bookings) {
     const qrDataUrl = await generateQRCode(booking.id);
     
-    // Add QR code
-    pdf.addImage(qrDataUrl, 'PNG', 20, yPos, 40, 40);
+    // Add QR code (slightly larger)
+    pdf.addImage(qrDataUrl, 'PNG', 20, yPos, 50, 50);
     
-    // Add event name with better formatting
-    pdf.setFontSize(12);
-    pdf.text(`Event: ${booking.eventName}`, 70, yPos + 15);
+    // Add event name with bigger, bold formatting and orange color
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(16);
+    pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
+    pdf.text(`EVENT: ${booking.eventName.toUpperCase()}`, 80, yPos + 20);
     
-    // Add booking ID with word wrapping
-    pdf.setFontSize(8);
+    // Add booking ID with medium size and orange color
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
     const bookingText = `Booking ID: ${booking.id}`;
-    const splitBookingText = pdf.splitTextToSize(bookingText, 120);
-    pdf.text(splitBookingText, 70, yPos + 25);
+    const splitBookingText = pdf.splitTextToSize(bookingText, 110);
+    pdf.text(splitBookingText, 80, yPos + 35);
     
-    // Add a separator line
-    pdf.line(20, yPos + 45, 190, yPos + 45);
+    // Add a thicker separator line (keep line in default black)
+    pdf.setDrawColor(0, 0, 0); // Black color for lines
+    pdf.setLineWidth(0.5);
+    pdf.line(20, yPos + 55, 190, yPos + 55);
     
-    yPos += 55;
+    yPos += 70;
     
     // Check if we need a new page
-    if (yPos > 240) {
+    if (yPos > 220) {
       pdf.addPage();
-      yPos = 30;
-      // Add title on new page
-      pdf.setFontSize(16);
-      pdf.text('Event Tickets (continued)', 20, 20);
-      pdf.setFontSize(10);
+      yPos = 40;
+      // Add title on new page with orange color
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(24);
+      pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
+      pdf.text('EVENT TICKETS (CONTINUED)', 20, 25);
     }
   }
 
