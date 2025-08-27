@@ -1,6 +1,7 @@
 import React from 'react';
 import { Event } from '@/lib/store';
 import clsx from 'clsx';
+import CountUp from './CountUp';
 
 interface EventCardProps {
   event: Event;
@@ -67,7 +68,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
         <span
           className={clsx(
-            'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
+            'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium gap-1',
             availableSeats > 10
               ? 'bg-green-100 text-green-700'
               : availableSeats > 0
@@ -75,7 +76,14 @@ export const EventCard: React.FC<EventCardProps> = ({
               : 'bg-red-100 text-red-700'
           )}
         >
-          {availableSeats} seats left
+          <CountUp
+            from={0}
+            to={availableSeats} 
+            direction="up"
+            duration={1}
+            className="count-up-text font-orbitron font-black"
+          />
+          <span className="font-orbitron font-black">seats left</span>
         </span>
         
         <div className="flex items-center justify-end space-x-2">
