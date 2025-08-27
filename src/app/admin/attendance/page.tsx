@@ -169,7 +169,7 @@ export default function AttendancePage() {
       record.userId,
       record.username,
       record.attended ? 'Yes' : 'No',
-      record.attendanceTime ? new Date(record.attendanceTime).toLocaleString() : ''
+  record.attendanceTime ? new Date(record.attendanceTime).toLocaleString() : ''
     ]);
 
     const csv = [
@@ -185,43 +185,64 @@ export default function AttendancePage() {
     a.click();
   };
 
+  const exportAllAttendance = async () => {
+    try {
+      const bookingsRef = collection(db, 'bookings');
+      const snapshot = await getDocs(bookingsRef);
+      const allRecords = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+
+      const headers = ['Booking ID', 'Event ID', 'Event Name', 'User ID', 'Attended', 'Attendance Time'];
+      const rows = allRecords.map((r) => [
+        r.id,
+        r.eventId,
+        r.eventName,
+        r.userId,
+        r.attended ? 'Yes' : 'No',
+        r.attendanceTime ? new Date(r.attendanceTime.seconds ? r.attendanceTime.seconds * 1000 : r.attendanceTime).toLocaleString() : ''
+      ]);
+
+      const csv = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', `attendance-all-events.csv`);
+      a.click();
+    } catch (error) {
+      console.error('Error exporting all attendance:', error);
+      toast.error('Failed to export all attendance');
+    }
+  };
+
   const exportAllEventsToSegmentedCSV = async () => {
     if (events.length === 0) {
       toast.error('No events available to export');
       return;
     }
-
     try {
       const csvRows: string[] = [];
-      
       // Add header
       csvRows.push('ATTENDANCE REPORT - ALL EVENTS');
       csvRows.push(`Generated on: ${new Date().toLocaleString()}`);
       csvRows.push(''); // Empty row for spacing
-      
       let totalBookings = 0;
       let totalPresent = 0;
-
       // Process each event
       for (let i = 0; i < events.length; i++) {
         const event = events[i];
-        
         // Add event header
-        csvRows.push(`EVENT ${i + 1}: ${event.name.toUpperCase()}`);
+        csvRows.push(`EVENT ${i + 1}: ${event.name?.toUpperCase()}`);
         csvRows.push(`Venue: ${event.venue || 'N/A'}`);
         csvRows.push(`Club: ${event.clubName || 'N/A'}`);
         csvRows.push(`Max Limit: ${event.maxLimit || 'N/A'}`);
         csvRows.push(''); // Empty row
-        
         // Fetch attendance records for this event
         const bookingsRef = collection(db, 'bookings');
         const q = query(bookingsRef, where('eventId', '==', event.id));
         const querySnapshot = await getDocs(q);
-        
         const eventRecords = await Promise.all(
           querySnapshot.docs.map(async (docSnapshot) => {
             const data = docSnapshot.data() as Booking;
-            
             // Fetch username from users collection
             let username = 'Unknown User';
             try {
@@ -230,7 +251,6 @@ export default function AttendancePage() {
             } catch (error) {
               console.error('Error fetching user profile for', data.userId, error);
             }
-            
             return {
               eventId: data.eventId,
               eventName: event.name,
@@ -241,10 +261,8 @@ export default function AttendancePage() {
             };
           })
         );
-
         // Add attendance table headers
         csvRows.push('User ID,Username,Status,Attendance Time');
-        
         // Add attendance records
         eventRecords.forEach(record => {
           const attendanceTimeStr = record.attendanceTime 
@@ -252,31 +270,26 @@ export default function AttendancePage() {
             : '-';
           csvRows.push(`${record.userId},${record.username},${record.attended ? 'Present' : 'Absent'},${attendanceTimeStr}`);
         });
-        
         // Calculate and add event statistics
         const eventBookings = eventRecords.length;
         const eventPresent = eventRecords.filter(r => r.attended).length;
         const eventAbsent = eventBookings - eventPresent;
         const attendanceRate = eventBookings > 0 ? ((eventPresent / eventBookings) * 100).toFixed(1) : '0';
-        
         csvRows.push(''); // Empty row
         csvRows.push('EVENT STATISTICS:');
         csvRows.push(`Total Bookings: ${eventBookings}`);
         csvRows.push(`Present: ${eventPresent}`);
         csvRows.push(`Absent: ${eventAbsent}`);
         csvRows.push(`Attendance Rate: ${attendanceRate}%`);
-        
         // Add separator between events (except for last event)
         if (i < events.length - 1) {
           csvRows.push('');
           csvRows.push('========================================');
           csvRows.push('');
         }
-        
         totalBookings += eventBookings;
         totalPresent += eventPresent;
       }
-      
       // Add overall summary at the end
       csvRows.push('');
       csvRows.push('========================================');
@@ -287,7 +300,6 @@ export default function AttendancePage() {
       csvRows.push(`Total Present: ${totalPresent}`);
       csvRows.push(`Total Absent: ${totalBookings - totalPresent}`);
       csvRows.push(`Overall Attendance Rate: ${totalBookings > 0 ? ((totalPresent / totalBookings) * 100).toFixed(1) : '0'}%`);
-
       // Create and download CSV
       const csv = csvRows.join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -296,7 +308,6 @@ export default function AttendancePage() {
       a.setAttribute('href', url);
       a.setAttribute('download', `segmented-attendance-report-${new Date().toISOString().split('T')[0]}.csv`);
       a.click();
-      
       toast.success(`Exported segmented report for ${events.length} events!`);
     } catch (error) {
       console.error('Error exporting segmented CSV:', error);

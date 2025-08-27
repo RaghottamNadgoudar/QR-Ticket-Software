@@ -72,9 +72,10 @@ export default function AttendanceTakersPage() {
       setNewTaker({ email: '', password: '', name: '', clubName: '' });
       toast.success('Attendance taker created successfully');
       fetchAttendanceTakers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating attendance taker:', error);
-      toast.error(error.message || 'Failed to create attendance taker');
+      const message = error instanceof Error ? error.message : String(error);
+      toast.error(message || 'Failed to create attendance taker');
     } finally {
       setLoading(false);
     }

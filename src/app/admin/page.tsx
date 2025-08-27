@@ -37,12 +37,15 @@ export default function AdminPage() {
         maxLimit: process.env.NEXT_PUBLIC_MAX_EVENTS_PER_DAY || '70',
         description: '',
       });
-    } catch (error) {
-  console.error('Error creating event (admin UI):', error);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const e: any = error;
-  setDebug(`${e.code ?? e.name}: ${e.message ?? String(e)}`);
-  toast.error('Failed to create event');
+    } catch (error: unknown) {
+      console.error('Error creating event (admin UI):', error);
+      if (error instanceof Error) {
+        const eAny = error as unknown as { code?: string };
+        setDebug(`${eAny.code ?? error.name}: ${error.message ?? String(error)}`);
+      } else {
+        setDebug(String(error));
+      }
+      toast.error('Failed to create event');
     }
   };
 

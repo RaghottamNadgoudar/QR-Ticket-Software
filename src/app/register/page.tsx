@@ -48,19 +48,21 @@ export default function Register() {
       const name = (user.email || '').split('@')[0];
       try {
         await createUserProfile(user.uid, { email: user.email || email, name });
-      } catch (profileErr: any) {
+      } catch (profileErr: unknown) {
         console.error('Failed to create user profile:', profileErr);
+        const message = profileErr instanceof Error ? profileErr.message : String(profileErr);
         // Surface Firestore error to the user
-        toast.error(profileErr.message || 'Registration succeeded but failed to create profile.');
+        toast.error(message || 'Registration succeeded but failed to create profile.');
         setLoading(false);
         return;
       }
 
       toast.success('Registration successful!');
       router.push('/student');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error registering:', error);
-      toast.error(error.message || 'Failed to register');
+      const message = error instanceof Error ? error.message : String(error);
+      toast.error(message || 'Failed to register');
     } finally {
       setLoading(false);
     }

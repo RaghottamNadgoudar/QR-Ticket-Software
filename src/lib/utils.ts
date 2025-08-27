@@ -15,53 +15,54 @@ export const generateQRCode = async (data: string): Promise<string> => {
 
 export const generatePDF = async (bookings: Booking[]): Promise<Blob> => {
   const pdf = new jsPDF();
-  let yPos = 40;
+  // 2x2 grid per page
+  const perPage = 4;
+  const marginX = 20;
+  const marginY = 30;
+  const gapX = 20;
+  const gapY = 20;
+  const qrSize = 70;
 
-  // Set font to a more modern/tech-like font
   pdf.setFont('helvetica', 'bold');
-  
-  // Add title with larger font and orange color
-  pdf.setFontSize(24);
-  pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
-  pdf.text('EVENT TICKETS', 20, 25);
-  
-  for (const booking of bookings) {
-    const qrDataUrl = await generateQRCode(booking.id);
-    
-    // Add QR code (slightly larger)
-    pdf.addImage(qrDataUrl, 'PNG', 20, yPos, 50, 50);
-    
-    // Add event name with bigger, bold formatting and orange color
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(16);
-    pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
-    pdf.text(`EVENT: ${booking.eventName.toUpperCase()}`, 80, yPos + 20);
-    
-    // Add booking ID with medium size and orange color
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(10);
-    pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
-    const bookingText = `Booking ID: ${booking.id}`;
-    const splitBookingText = pdf.splitTextToSize(bookingText, 110);
-    pdf.text(splitBookingText, 80, yPos + 35);
-    
-    // Add a thicker separator line (keep line in default black)
-    pdf.setDrawColor(0, 0, 0); // Black color for lines
-    pdf.setLineWidth(0.5);
-    pdf.line(20, yPos + 55, 190, yPos + 55);
-    
-    yPos += 70;
-    
-    // Check if we need a new page
-    if (yPos > 220) {
+
+  for (let i = 0; i < bookings.length; i++) {
+    const pageIndex = Math.floor(i / perPage);
+    const indexOnPage = i % perPage;
+
+    if (indexOnPage === 0 && i !== 0) {
       pdf.addPage();
-      yPos = 40;
-      // Add title on new page with orange color
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(24);
-      pdf.setTextColor(237, 94, 74); // Orange color (#ED5E4A)
-      pdf.text('EVENT TICKETS (CONTINUED)', 20, 25);
     }
+
+    // Add page title
+    pdf.setFontSize(20);
+    pdf.setTextColor(237, 94, 74);
+    pdf.text('EVENT TICKETS', marginX, 20 + pageIndex * 0);
+
+    const col = indexOnPage % 2;
+    const row = Math.floor(indexOnPage / 2);
+
+    const x = marginX + col * (qrSize + gapX + 60);
+    const y = marginY + row * (qrSize + gapY + 40);
+
+    const booking = bookings[i];
+    const qrDataUrl = await generateQRCode(booking.id);
+
+    // Add QR code
+    pdf.addImage(qrDataUrl, 'PNG', x, y, qrSize, qrSize);
+
+    // Event name
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(237, 94, 74);
+    pdf.text(`EVENT: ${booking.eventName}`, x + qrSize + 8, y + 18);
+
+    // Booking ID
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.setTextColor(0, 0, 0);
+    const bookingText = `Booking ID: ${booking.id}`;
+    const splitBookingText = pdf.splitTextToSize(bookingText, 80);
+    pdf.text(splitBookingText, x + qrSize + 8, y + 34);
   }
 
   return pdf.output('blob');
@@ -75,12 +76,15 @@ export const createEvent = async (eventData: Omit<Event, 'id' | 'currentBookings
       currentBookings: 0,
     }); 
     return docRef.id;
-  } catch (error) {
-  // Log FirebaseError details when permission issues occur
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const e: any = error;
-  console.error('Error creating event:', e.code ?? e.name, e.message ?? e);
-  throw error;
+  } catch (error: unknown) {
+    // Log FirebaseError details when permission issues occur
+    if (error instanceof Error) {
+      const eAny = error as unknown as { code?: string };
+      console.error('Error creating event:', eAny.code ?? error.name, error.message ?? String(error));
+    } else {
+      console.error('Error creating event:', String(error));
+    }
+    throw error;
   }
 };
 
