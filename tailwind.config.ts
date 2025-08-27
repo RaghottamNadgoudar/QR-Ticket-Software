@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        'brand-primary': '#ED5E4A',
+        'brand-dark': '#001F3F',
+      },
       fontFamily: {
         'orbitron': ['var(--font-orbitron)', 'sans-serif'],
         'sans': ['var(--font-geist-sans)', 'sans-serif'],

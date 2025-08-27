@@ -118,7 +118,7 @@ export default function StudentEvents() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
           <p className="text-gray-600 font-orbitron">Loading events...</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function StudentEvents() {
               <div className="relative">
                 <select
                   id="club"
-                  className="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm text-gray-900 shadow-sm transition-colors focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 font-medium cursor-pointer"
+                  className="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm text-gray-900 shadow-sm transition-colors focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1 font-medium cursor-pointer"
                   value={selectedClub}
                   onChange={(e) => setSelectedClub(e.target.value)}
                 >

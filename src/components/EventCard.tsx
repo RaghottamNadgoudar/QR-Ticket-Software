@@ -27,7 +27,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         {
           'bg-white border-gray-200 hover:shadow-lg hover:border-gray-300 cursor-pointer': !disabled && !selected,
           'bg-gray-50 border-gray-200 cursor-not-allowed opacity-60': disabled,
-          'bg-orange-50 border-orange-300 ring-2 ring-orange-500 ring-opacity-50 cursor-pointer hover:bg-orange-100': selected,
+          'bg-orange-50 border-orange-300 ring-2 ring-orange-500 ring-opacity-50 cursor-pointer hover:bg-brand-primary/20': selected,
         }
       )}
       onClick={!disabled ? onClick : undefined}

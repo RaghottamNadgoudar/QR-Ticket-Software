@@ -92,7 +92,7 @@ export const EventCart: React.FC<EventCartProps> = ({ onBookEvents }) => {
           <button
             onClick={onBookEvents}
             disabled={!hasAllSlots}
-            className="w-full py-3 px-4 bg-orange-600 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-orange-700 transition-all duration-200 font-orbitron shadow-sm"
+            className="w-full py-3 px-4 bg-orange-600 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-brand-primary transition-all duration-200 font-orbitron shadow-sm"
           >
             {hasAllSlots ? '🎫 Book All Events' : 'Complete Selection First'}
           </button>
