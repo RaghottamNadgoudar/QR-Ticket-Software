@@ -76,6 +76,20 @@ export default function Home() {
       
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-md space-y-8 bg-white/95 backdrop-blur-sm rounded-2xl p-10 shadow-xl border border-gray-200">
+        {/* Logos Section */}
+        <div className="flex items-center justify-center space-x-6 mb-6">
+          <img 
+            src="/RVCE_Logo_Black_Text-1-line.png" 
+            alt="RVCE Logo" 
+            className="h-16 w-auto object-contain"
+          />
+          <img 
+            src="/CCLogo_BG_Removed-Black.png" 
+            alt="CC Logo" 
+            className="h-16 w-auto object-contain"
+          />
+        </div>
+        
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 font-orbitron">
             {process.env.NEXT_PUBLIC_APP_NAME}

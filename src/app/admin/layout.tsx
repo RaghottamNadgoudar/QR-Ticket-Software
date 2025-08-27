@@ -46,6 +46,15 @@ export default function AdminLayout({
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="flex h-16 justify-between">
                 <div className="flex">
+                  {/* Left Logo */}
+                  <div className="flex flex-shrink-0 items-center mr-4">
+                    <img 
+                      src="/RVCE_Logo_Black_Text-1-line.png" 
+                      alt="RVCE Logo" 
+                      className="h-10 w-auto object-contain"
+                    />
+                  </div>
+                  
                   <div className="flex flex-shrink-0 items-center">
                     <h1 className="text-xl font-bold text-gray-900 font-orbitron">
                       {process.env.NEXT_PUBLIC_APP_NAME} {isAttendanceTaker ? 'Club Admin' : 'Admin'}
@@ -68,6 +77,15 @@ export default function AdminLayout({
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
                   <UserMenu />
+                  
+                  {/* Right Logo */}
+                  <div className="flex flex-shrink-0 items-center ml-4">
+                    <img 
+                      src="/CCLogo_BG_Removed-Black.png" 
+                      alt="CC Logo" 
+                      className="h-10 w-auto object-contain"
+                    />
+                  </div>
                 </div>
                 <div className="-mr-2 flex items-center sm:hidden">
                   <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
