@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Event } from '@/lib/store';
-import { QrScanner } from '@/components/QrScanner';
+import { QrScannerLib as QrScanner } from '@/components/QrScannerLib';
 import { markAttendance } from '@/lib/utils';
 import { getUserProfile } from '@/lib/users';
 import toast from 'react-hot-toast';
