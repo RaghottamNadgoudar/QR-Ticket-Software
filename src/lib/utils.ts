@@ -15,13 +15,14 @@ export const generateQRCode = async (data: string): Promise<string> => {
 
 export const generatePDF = async (bookings: Booking[]): Promise<Blob> => {
   const pdf = new jsPDF();
-  // 2x2 grid per page
-  const perPage = 4;
+  // Vertical layout - one QR per row
+  const perPage = 3; // 3 QR codes per page for better spacing
   const marginX = 20;
-  const marginY = 30;
-  const gapX = 20;
-  const gapY = 20;
-  const qrSize = 70;
+  const marginY = 50;
+  const verticalSpacing = 80; // Space between each QR code row
+  const qrSize = 60;
+  const pageWidth = pdf.internal.pageSize.width;
+  const availableTextWidth = pageWidth - marginX - qrSize - 25 - 20; // Page width minus margins and QR space
 
   pdf.setFont('helvetica', 'bold');
 
@@ -33,36 +34,37 @@ export const generatePDF = async (bookings: Booking[]): Promise<Blob> => {
       pdf.addPage();
     }
 
-    // Add page title
-    pdf.setFontSize(20);
-    pdf.setTextColor(237, 94, 74);
-    pdf.text('EVENT TICKETS', marginX, 20 + pageIndex * 0);
+    // Add page title only once per page
+    if (indexOnPage === 0) {
+      pdf.setFontSize(20);
+      pdf.setTextColor(237, 94, 74);
+      pdf.text('EVENT TICKETS', marginX, 20);
+    }
 
-    const col = indexOnPage % 2;
-    const row = Math.floor(indexOnPage / 2);
-
-    const x = marginX + col * (qrSize + gapX + 60);
-    const y = marginY + row * (qrSize + gapY + 40);
+    // Calculate Y position for vertical arrangement
+    const y = marginY + indexOnPage * verticalSpacing;
 
     const booking = bookings[i];
     const qrDataUrl = await generateQRCode(booking.id);
 
-    // Add QR code
-    pdf.addImage(qrDataUrl, 'PNG', x, y, qrSize, qrSize);
+    // Add QR code on the left
+    pdf.addImage(qrDataUrl, 'PNG', marginX, y, qrSize, qrSize);
 
-    // Event name
-    pdf.setFontSize(12);
+    // Event name next to QR code
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(237, 94, 74);
-    pdf.text(`EVENT: ${booking.eventName}`, x + qrSize + 8, y + 18);
+    const eventText = `EVENT: ${booking.eventName}`;
+    const splitEventText = pdf.splitTextToSize(eventText, availableTextWidth);
+    pdf.text(splitEventText, marginX + qrSize + 15, y + 20);
 
-    // Booking ID
+    // Booking ID below event name with proper text wrapping
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9);
     pdf.setTextColor(0, 0, 0);
     const bookingText = `Booking ID: ${booking.id}`;
-    const splitBookingText = pdf.splitTextToSize(bookingText, 80);
-    pdf.text(splitBookingText, x + qrSize + 8, y + 34);
+    const splitBookingText = pdf.splitTextToSize(bookingText, availableTextWidth);
+    pdf.text(splitBookingText, marginX + qrSize + 15, y + 35);
   }
 
   return pdf.output('blob');
