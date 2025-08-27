@@ -95,6 +95,40 @@ export default function AttendanceTakersPage() {
     }
   };
 
+  const exportToCSV = () => {
+    if (attendanceTakers.length === 0) {
+      toast.error('No attendance takers to export');
+      return;
+    }
+
+    try {
+      const headers = ['Name', 'Email', 'Club Name', 'Created Date'];
+      const rows = attendanceTakers.map(taker => [
+        taker.name,
+        taker.email,
+        taker.clubName,
+        new Date(taker.createdAt).toLocaleDateString()
+      ]);
+
+      const csv = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+      ].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', `attendance-takers-${new Date().toISOString().split('T')[0]}.csv`);
+      a.click();
+      
+      toast.success(`Exported ${attendanceTakers.length} attendance takers`);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      toast.error('Failed to export CSV');
+    }
+  };
+
   if (loading && attendanceTakers.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -116,16 +150,27 @@ export default function AttendanceTakersPage() {
               <h1 className="text-2xl font-bold text-gray-900 font-orbitron">Attendance Takers</h1>
               <p className="mt-1 text-sm text-gray-600">Manage club attendance takers and their permissions</p>
             </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors font-orbitron"
-              style={{ backgroundColor: '#ED5E4A', borderColor: '#ED5E4A' }}
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Add New Taker
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={exportToCSV}
+                className="inline-flex items-center py-3 px-6 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors font-orbitron"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export CSV
+              </button>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors font-orbitron"
+                style={{ backgroundColor: '#ED5E4A', borderColor: '#ED5E4A' }}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add New Taker
+              </button>
+            </div>
           </div>
         </div>
       </div>
