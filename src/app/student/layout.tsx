@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import { Fragment } from 'react';
 import { Disclosure } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 const UserMenu = dynamic(() => import('@/components/UserMenu'), { ssr: false });
 
 const navigation = [
@@ -29,7 +31,7 @@ export default function StudentLayout({
               <div className="flex h-16 justify-between">
                 <div className="flex">
                   <div className="flex flex-shrink-0 items-center">
-                    <h1 className="text-xl font-bold text-gray-900">
+                    <h1 className="text-xl font-bold text-gray-900 font-orbitron">
                       {process.env.NEXT_PUBLIC_APP_NAME}
                     </h1>
                   </div>
@@ -38,7 +40,7 @@ export default function StudentLayout({
                       <a
                         key={item.name}
                         href={item.href}
-                        className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 font-orbitron"
                       >
                         {item.name}
                       </a>
@@ -68,7 +70,7 @@ export default function StudentLayout({
                     key={item.name}
                     as="a"
                     href={item.href}
-                    className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+                    className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 font-orbitron"
                   >
                     {item.name}
                   </Disclosure.Button>

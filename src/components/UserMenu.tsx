@@ -34,7 +34,7 @@ export default function UserMenu() {
             {({ active }) => (
               <button
                 onClick={handleSignOut}
-                className="block px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-100"
+                className="block px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-100 font-orbitron"
               >
                 Sign out
               </button>
