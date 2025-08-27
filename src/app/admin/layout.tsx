@@ -7,6 +7,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 const UserMenu = dynamic(() => import('@/components/UserMenu'), { ssr: false });
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useAuth } from '@/contexts/auth';
 
 const navigation = [
   { 
@@ -31,6 +32,8 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { isAttendanceTaker } = useAuth();
+  
   const handleSignOut = () => {
     signOut(auth).catch(console.error);
   };
@@ -45,7 +48,7 @@ export default function AdminLayout({
                 <div className="flex">
                   <div className="flex flex-shrink-0 items-center">
                     <h1 className="text-xl font-bold text-gray-900 font-orbitron">
-                      {process.env.NEXT_PUBLIC_APP_NAME} Admin
+                      {process.env.NEXT_PUBLIC_APP_NAME} {isAttendanceTaker ? 'Club Admin' : 'Admin'}
                     </h1>
                   </div>
                   <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
