@@ -15,6 +15,7 @@ export interface Booking {
   id: string;
   userId: string;
   eventId: string;
+  eventName: string;
   qrCode: string;
   attended: boolean;
   timestamp: Date;

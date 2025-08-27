@@ -15,19 +15,42 @@ export const generateQRCode = async (data: string): Promise<string> => {
 
 export const generatePDF = async (bookings: Booking[]): Promise<Blob> => {
   const pdf = new jsPDF();
-  let yPos = 20;
+  let yPos = 30;
+
+  // Add title
+  pdf.setFontSize(16);
+  pdf.text('Event Tickets', 20, 20);
+  pdf.setFontSize(10);
 
   for (const booking of bookings) {
     const qrDataUrl = await generateQRCode(booking.id);
     
-    pdf.addImage(qrDataUrl, 'PNG', 20, yPos, 50, 50);
-    pdf.text(`Event ID: ${booking.eventId}`, 80, yPos + 20);
-    pdf.text(`Booking ID: ${booking.id}`, 80, yPos + 30);
+    // Add QR code
+    pdf.addImage(qrDataUrl, 'PNG', 20, yPos, 40, 40);
     
-    yPos += 60;
-    if (yPos > 250) {
+    // Add event name with better formatting
+    pdf.setFontSize(12);
+    pdf.text(`Event: ${booking.eventName}`, 70, yPos + 15);
+    
+    // Add booking ID with word wrapping
+    pdf.setFontSize(8);
+    const bookingText = `Booking ID: ${booking.id}`;
+    const splitBookingText = pdf.splitTextToSize(bookingText, 120);
+    pdf.text(splitBookingText, 70, yPos + 25);
+    
+    // Add a separator line
+    pdf.line(20, yPos + 45, 190, yPos + 45);
+    
+    yPos += 55;
+    
+    // Check if we need a new page
+    if (yPos > 240) {
       pdf.addPage();
-      yPos = 20;
+      yPos = 30;
+      // Add title on new page
+      pdf.setFontSize(16);
+      pdf.text('Event Tickets (continued)', 20, 20);
+      pdf.setFontSize(10);
     }
   }
 
@@ -40,7 +63,7 @@ export const createEvent = async (eventData: Omit<Event, 'id' | 'currentBookings
     const docRef = await addDoc(eventsRef, {
       ...eventData,
       currentBookings: 0,
-    });
+    }); 
     return docRef.id;
   } catch (error) {
   // Log FirebaseError details when permission issues occur

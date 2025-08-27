@@ -21,6 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -46,16 +47,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         document.cookie = `token=${token};path=/;max-age=3600;samesite=strict;secure`;
         document.cookie = `isAdmin=${isAdmin};path=/;max-age=3600;samesite=strict;secure`;
         
-        // Only redirect if this is not the initial load and user just signed in
-        if (!initialLoad) {
+        // Only redirect if this is not the initial load, user just signed in, and we haven't redirected yet
+        // Also check if we're not already on a valid user page
+        const currentPath = window.location.pathname;
+        const isOnValidUserPage = currentPath.startsWith('/student') || currentPath.startsWith('/admin');
+        
+        if (!initialLoad && !hasRedirected && !isOnValidUserPage) {
           if (isAdmin) {
             router.push('/admin');
           } else {
             router.push('/student');
           }
+          setHasRedirected(true);
         }
       } else {
         setUser(null);
+        setHasRedirected(false);
         // Clear cookies
         document.cookie = 'token=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
         document.cookie = 'isAdmin=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
@@ -70,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [router, initialLoad, loading]);
+  }, [router, initialLoad, loading, hasRedirected]);
 
   const value = {
     user,

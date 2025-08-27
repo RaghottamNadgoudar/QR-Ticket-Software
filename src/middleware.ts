@@ -26,6 +26,11 @@ export function middleware(request: NextRequest) {
   if (path.startsWith('/admin') && request.cookies.get('isAdmin')?.value !== 'true') {
     return NextResponse.redirect(new URL('/student', request.url));
   }
+  
+  // If admin is trying to access student pages, redirect to admin
+  if (path.startsWith('/student') && request.cookies.get('isAdmin')?.value === 'true') {
+    return NextResponse.redirect(new URL('/admin', request.url));
+  }
 
   return NextResponse.next();
 }

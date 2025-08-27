@@ -53,7 +53,7 @@ export default function StudentBookingsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">My Bookings</h1>
+        <h1 className="text-2xl font-bold text-orange-600 font-orbitron">My Bookings</h1>
         {bookings.length > 0 && (
           <button
             onClick={handleDownloadPDF}
@@ -73,7 +73,7 @@ export default function StudentBookingsPage() {
               key={booking.id}
               className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
             >
-              <h3 className="font-semibold text-lg mb-2">{booking.eventName}</h3>
+              <h3 className="font-semibold text-lg mb-2 text-orange-600 font-orbitron">{booking.eventName}</h3>
               <img
                 src={booking.qrCode}
                 alt="Event QR Code"
