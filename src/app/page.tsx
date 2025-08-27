@@ -23,15 +23,6 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const adminEmail = process.env.ADMIN_EMAIL;
-      
-      // Check if email domain is allowed for non-admin users
-      if (email !== adminEmail && 
-          !email.endsWith(`@${process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN}`)) {
-        toast.error(`Only ${process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN} email addresses are allowed`);
-        return;
-      }
-
       // Just sign in - let the AuthProvider handle the redirect
       await signInWithEmailAndPassword(auth, email, password);
       
