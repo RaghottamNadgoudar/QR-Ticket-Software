@@ -169,7 +169,7 @@ export default function StudentEvents() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3" id="events-section">
             {filteredEvents.length === 0 ? (
               <div className="text-center py-12">
                 <div className="mx-auto h-12 w-12 text-gray-400">
@@ -224,11 +224,51 @@ export default function StudentEvents() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-6">
+            <div className="sticky top-6" id="cart-section">
               <EventCart onBookEvents={handleBookEvents} />
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-3 lg:hidden">
+        <button
+          onClick={() => {
+            document.getElementById('events-section')?.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }}
+          className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+          style={{ backgroundColor: '#ED5E4A' }}
+          title="View Events"
+        >
+          <svg className="w-6 h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </button>
+
+        <button
+          onClick={() => {
+            document.getElementById('cart-section')?.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }}
+          className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center relative group"
+          style={{ backgroundColor: '#ED5E4A' }}
+          title="View Cart"
+        >
+          <svg className="w-6 h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6 0a1 1 0 100-2 1 1 0 000 2zm0 0h2a1 1 0 100-2 1 1 0 000 2z" />
+          </svg>
+          {selectedEvents.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+              {selectedEvents.length}
+            </span>
+          )}
+        </button>
       </div>
     </div>
   );
