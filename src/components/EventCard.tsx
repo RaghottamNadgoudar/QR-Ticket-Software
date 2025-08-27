@@ -76,23 +76,31 @@ export const EventCard: React.FC<EventCardProps> = ({
               : 'bg-red-100 text-red-700'
           )}
         >
-          <CountUp
-            from={0}
-            to={availableSeats} 
-            direction="up"
-            duration={1}
-            className="count-up-text font-orbitron font-black"
-          />
-          <span className="font-orbitron font-black">seats left</span>
+          {availableSeats > 1 ? (
+            <>
+              <CountUp
+                from={0}
+                to={availableSeats}
+                direction="up"
+                duration={1}
+                className="count-up-text font-orbitron font-black"
+              />
+              <span className="font-orbitron font-black">seats left</span>
+            </>
+          ) : availableSeats === 1 ? (
+            <span className="font-orbitron font-black">Last seat available</span>
+          ) : (
+            <span className="font-orbitron font-black">No seats available</span>
+          )}
         </span>
-        
+
         <div className="flex items-center justify-end space-x-2">
           {selected && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
               ✓ Selected
             </span>
           )}
-          
+
           {disabled && disabledReason && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
               {disabledReason}

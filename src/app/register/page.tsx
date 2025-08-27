@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import { useState } from 'react';
 import { auth } from '@/lib/firebase';
@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DotGrid from '@/components/DotGrid';
+import Image from 'next/image';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -21,36 +22,30 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // Validate password match
       if (password !== confirmPassword) {
         toast.error('Passwords do not match');
         return;
       }
 
-      // Validate email domain
       if (!email.endsWith(`@${process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN}`)) {
         toast.error(`Only ${process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN} email addresses are allowed`);
         return;
       }
 
-      // Create auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Ensure the ID token is available for Firestore rules evaluation
       try {
         await user.getIdToken(true);
       } catch (tokenErr) {
         console.warn('Could not refresh ID token after signup:', tokenErr);
       }
 
-      // Create user profile in Firestore (name derived from email local-part)
       const name = (user.email || '').split('@')[0];
       try {
         await createUserProfile(user.uid, { email: user.email || email, name });
       } catch (profileErr: any) {
         console.error('Failed to create user profile:', profileErr);
-        // Surface Firestore error to the user
         toast.error(profileErr.message || 'Registration succeeded but failed to create profile.');
         setLoading(false);
         return;
@@ -67,9 +62,9 @@ export default function Register() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8" style={{ backgroundColor: '#F8FAFC' }}>
-      {/* DotGrid Background */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-orange-500 to-orange-600">
+      {/* Background Option 1: DotGrid */}
+      <div className="absolute inset-0 z-0">
         <DotGrid
           dotSize={8}
           gap={25}
@@ -82,23 +77,44 @@ export default function Register() {
           returnDuration={1.2}
         />
       </div>
-      
-      {/* Main Content */}
+
+      {/* Corner Logos (Option 2) */}
+      <div className="pointer-events-none absolute left-4 top-4 sm:left-6 sm:top-6">
+        <Image
+          src="/RVCE%20Corner%20Logo%20BLACK-2%20line.png"
+          alt="RVCE logo"
+          width={320}
+          height={96}
+          className="h-16 w-auto sm:h-20"
+          priority
+        />
+      </div>
+      <div className="pointer-events-none absolute right-4 top-4 sm:right-6 sm:top-6">
+        <Image
+          src="/CCLogo_BG_Removed-Black.png"
+          alt="CC logo"
+          width={320}
+          height={96}
+          className="h-16 w-auto sm:h-20"
+          priority
+        />
+      </div>
+
+      {/* Main Card */}
       <div className="relative z-10 w-full max-w-md space-y-8 bg-white/95 backdrop-blur-sm rounded-2xl p-10 shadow-xl border border-gray-200">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 font-orbitron">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 font-orbitron">
             Register for {process.env.NEXT_PUBLIC_APP_NAME}
           </h2>
-          <p className="mt-3 text-center text-sm text-gray-600 font-orbitron">
+          <p className="mt-3 text-sm text-gray-600 font-orbitron">
             Create your student account
           </p>
         </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4 rounded-md shadow-sm">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
+              <label htmlFor="email" className="sr-only">Email address</label>
               <input
                 id="email"
                 name="email"
@@ -112,9 +128,7 @@ export default function Register() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
                 id="password"
                 name="password"
@@ -128,9 +142,7 @@ export default function Register() {
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirm Password
-              </label>
+              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -155,6 +167,7 @@ export default function Register() {
             </button>
           </div>
         </form>
+
         <div className="text-center mt-6">
           <Link href="/" className="text-sm text-orange-600 hover:text-brand-primary font-medium font-orbitron">
             Already have an account? Sign in

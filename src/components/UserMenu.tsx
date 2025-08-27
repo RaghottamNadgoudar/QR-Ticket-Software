@@ -4,10 +4,21 @@ import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useAuth } from '@/contexts/auth';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function UserMenu() {
-  const handleSignOut = () => {
-    signOut(auth).catch(console.error);
+  const { user, isAdmin, isAttendanceTaker } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -30,16 +41,83 @@ export default function UserMenu() {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="px-4 py-2 text-xs text-gray-500 border-b">
+            Signed in as<br />
+            <span className="font-medium text-gray-900">{user?.email}</span>
+          </div>
+
+          {isAdmin && (
+            <Menu.Item>
+              {({ active }) => (
+                <Link
+                  href="/admin"
+                  className={`block px-4 py-2 text-sm text-gray-700 w-full text-left ${
+                    active ? 'bg-gray-100' : ''
+                  }`}
+                >
+                  Admin Dashboard
+                </Link>
+              )}
+            </Menu.Item>
+          )}
+
+          {isAttendanceTaker && (
+            <Menu.Item>
+              {({ active }) => (
+                <Link
+                  href="/attendance-taker"
+                  className={`block px-4 py-2 text-sm text-gray-700 w-full text-left ${
+                    active ? 'bg-gray-100' : ''
+                  }`}
+                >
+                  Take Attendance
+                </Link>
+              )}
+            </Menu.Item>
+          )}
+
+          {!isAdmin && !isAttendanceTaker && (
+            <>
+              <Menu.Item>
+                {({ active }) => (
+                  <Link
+                    href="/student"
+                    className={`block px-4 py-2 text-sm text-gray-700 w-full text-left ${
+                      active ? 'bg-gray-100' : ''
+                    }`}
+                  >
+                    Book Events
+                  </Link>
+                )}
+              </Menu.Item>
+              <Menu.Item>
+                {({ active }) => (
+                  <Link
+                    href="/student/bookings"
+                    className={`block px-4 py-2 text-sm text-gray-700 w-full text-left ${
+                      active ? 'bg-gray-100' : ''
+                    }`}
+                  >
+                    My Bookings
+                  </Link>
+                )}
+              </Menu.Item>
+            </>
+          )}
+
           <Menu.Item>
-            {({ active }) => (
-              <button
-                onClick={handleSignOut}
-                className="block px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-100 font-orbitron"
-              >
-                Sign out
-              </button>
-            )}
-          </Menu.Item>
+  {({ active }) => (
+    <button
+      onClick={handleSignOut}
+      className={`block px-4 py-2 text-sm text-gray-700 w-full text-left border-t font-orbitron ${
+        active ? 'bg-gray-100' : ''
+      }`}
+    >
+      Sign out
+    </button>
+  )}
+</Menu.Item>
+
         </Menu.Items>
       </Transition>
     </Menu>
