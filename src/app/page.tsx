@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -14,14 +15,29 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    const checkUserRole = async (user: any) => {
+      if (!user) return;
+
+      if (user.email === process.env.ADMIN_EMAIL) {
+        router.push('/admin');
+        return;
+      }
+
+      // Check if user is an attendance taker
+      const takersRef = collection(db, 'attendanceTakers');
+      const q = query(takersRef, where('email', '==', user.email));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        router.push('/attendance-taker');
+      } else {
+        router.push('/student');
+      }
+    };
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        // Check if user is admin
-        if (user.email === process.env.ADMIN_EMAIL) {
-          router.push('/admin');
-        } else {
-          router.push('/student');
-        }
+        checkUserRole(user);
       }
     });
 
@@ -34,14 +50,6 @@ export default function Home() {
 
     try {
       const adminEmail = process.env.ADMIN_EMAIL;
-      
-      // Debug logs
-      console.log('Login Debug:', {
-        attemptEmail: email,
-        adminEmail,
-        isAdminAttempt: email === adminEmail,
-        allowedDomain: process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN
-      });
       
       // Check if email domain is allowed for non-admin users
       if (email !== adminEmail && 
@@ -56,12 +64,30 @@ export default function Home() {
 
       if (user.email === process.env.ADMIN_EMAIL) {
         router.push('/admin');
+        return;
+      }
+
+      // Check if user is an attendance taker
+      const takersRef = collection(db, 'attendanceTakers');
+      const q = query(takersRef, where('email', '==', user.email));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        router.push('/attendance-taker');
       } else {
         router.push('/student');
       }
-    } catch (error) {
+
+      toast.success('Successfully signed in!');
+    } catch (error: any) {
       console.error('Error signing in:', error);
-      toast.error('Invalid credentials');
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+        toast.error('Invalid email or password');
+      } else if (error.code === 'auth/too-many-requests') {
+        toast.error('Too many failed attempts. Please try again later.');
+      } else {
+        toast.error('Failed to sign in. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -118,7 +144,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
