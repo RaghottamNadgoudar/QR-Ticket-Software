@@ -14,7 +14,7 @@ export default function StudentEvents() {
   const [selectedClub, setSelectedClub] = useState<string>('');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const { selectedEvents, addEvent, hasEventInSlot, canAddEvent } = useEventStore();
+  const { selectedEvents, addEvent, hasEventInSlot, hasEventFromClub, canAddEvent } = useEventStore();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -147,10 +147,23 @@ export default function StudentEvents() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredEvents.map((event) => {
             const isSelected = selectedEvents.some(e => e.id === event.id);
-            const isDisabled =
-              event.currentBookings >= event.maxLimit ||
-              (hasEventInSlot(event.eventSlot) && !isSelected) ||
-              (!canAddEvent(event) && !isSelected);
+            const isEventFull = event.currentBookings >= event.maxLimit;
+            const hasSlotConflict = hasEventInSlot(event.eventSlot) && !isSelected;
+            const hasClubConflict = hasEventFromClub(event.clubName) && !isSelected;
+            const cannotAdd = !canAddEvent(event) && !isSelected;
+            
+            const isDisabled = isEventFull || hasSlotConflict || hasClubConflict || cannotAdd;
+            
+            let disabledReason = '';
+            if (isEventFull) {
+              disabledReason = 'Event Full';
+            } else if (hasSlotConflict) {
+              disabledReason = 'Slot Conflict';
+            } else if (hasClubConflict) {
+              disabledReason = 'Club Limit Reached';
+            } else if (cannotAdd) {
+              disabledReason = 'Daily Limit Reached';
+            }
 
             return (
               <EventCard
@@ -158,6 +171,7 @@ export default function StudentEvents() {
                 event={event}
                 selected={isSelected}
                 disabled={isDisabled}
+                disabledReason={disabledReason}
                 onClick={() => {
                   if (isSelected) {
                     // Remove event logic is handled in the cart

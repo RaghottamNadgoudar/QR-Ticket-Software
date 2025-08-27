@@ -7,6 +7,7 @@ interface EventCardProps {
   onClick?: () => void;
   selected?: boolean;
   disabled?: boolean;
+  disabledReason?: string;
 }
 
 export const EventCard: React.FC<EventCardProps> = ({
@@ -14,6 +15,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   onClick,
   selected = false,
   disabled = false,
+  disabledReason,
 }) => {
   const availableSeats = event.maxLimit - event.currentBookings;
 
@@ -55,6 +57,12 @@ export const EventCard: React.FC<EventCardProps> = ({
         {selected && (
           <span className="text-blue-600 text-sm font-medium">
             Selected
+          </span>
+        )}
+        
+        {disabled && disabledReason && (
+          <span className="text-red-600 text-xs font-medium">
+            {disabledReason}
           </span>
         )}
       </div>

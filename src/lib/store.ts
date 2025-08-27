@@ -26,7 +26,8 @@ interface EventStore {
   removeEvent: (eventId: string) => void;
   clearEvents: () => void;
   hasEventInSlot: (slot: number) => boolean;
-  canAddEvent: (event: Event) => boolean;
+  hasEventFromClub: (clubName: string) => boolean; // Check if user already selected an event from this club
+  canAddEvent: (event: Event) => boolean; // Validates all selection criteria
 }
 
 export const useEventStore = create<EventStore>((set, get) => ({
@@ -45,11 +46,14 @@ export const useEventStore = create<EventStore>((set, get) => ({
   clearEvents: () => set({ selectedEvents: [] }),
   hasEventInSlot: (slot) =>
     get().selectedEvents.some((event) => event.eventSlot === slot),
+  hasEventFromClub: (clubName) =>
+    get().selectedEvents.some((event) => event.clubName === clubName),
   canAddEvent: (event) => {
     const state = get();
     return (
-      !state.hasEventInSlot(event.eventSlot) &&
-      state.selectedEvents.length < Number(process.env.NEXT_PUBLIC_MAX_EVENTS_PER_DAY || 4)
+      !state.hasEventInSlot(event.eventSlot) && // No event in same time slot
+      !state.hasEventFromClub(event.clubName) && // No event from same club
+      state.selectedEvents.length < Number(process.env.NEXT_PUBLIC_MAX_EVENTS_PER_DAY || 4) // Under daily limit
     );
   },
 }));
