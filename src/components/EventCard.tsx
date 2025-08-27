@@ -49,8 +49,16 @@ export const EventCard: React.FC<EventCardProps> = ({
               : 'bg-red-100 text-red-800'
           )}
         >
-          {availableSeats} seats left
+          {availableSeats === 0 ? 'No seats available' : 
+           availableSeats === 1 ? 'Last seat available' : 
+           `${availableSeats} seats left`}
         </span>
+        
+        {disabled && event.currentBookings >= event.maxLimit && (
+          <span className="text-red-600 text-sm font-medium">
+            Full
+          </span>
+        )}
         
         {selected && (
           <span className="text-blue-600 text-sm font-medium">

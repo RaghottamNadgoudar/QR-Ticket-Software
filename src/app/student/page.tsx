@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot, DocumentSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { Event, useEventStore } from '@/lib/store';
 import { EventCard } from '@/components/EventCard';
@@ -22,7 +22,23 @@ export default function StudentEvents() {
         const eventsRef = collection(db, 'events');
         const querySnapshot = await getDocs(eventsRef);
         
-        // Validate and transform the data
+        // Set up real-time listeners for each event
+        const unsubscribes = querySnapshot.docs.map(doc => {
+          return onSnapshot(doc.ref, (snapshot) => {
+            setEvents(prev => prev.map(event => 
+              event.id === snapshot.id 
+                ? { ...event, ...snapshot.data() } 
+                : event
+            ));
+          });
+        });
+
+        // Cleanup listeners on unmount
+        return () => {
+          unsubscribes.forEach(unsub => unsub());
+        };
+        
+        // Initial data load
         const fetchedEvents = querySnapshot.docs.map(doc => {
           const data = doc.data();
           // Ensure all required fields are present and of correct type
