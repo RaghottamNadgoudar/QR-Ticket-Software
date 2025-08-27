@@ -13,8 +13,26 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [department, setDepartment] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const departments = [
+    'Artificial Intelligence and Machine Learning',
+    'Computer Science & Engineering',
+    'Computer Science & Engineering (Data Science)',
+    'Computer Science & Engineering (Cyber Security)',
+    'Electronics & Communication Engineering',
+    'Electrical & Electronics Engineering',
+    'Electronics & Telecommunication Engineering',
+    'Mechanical Engineering',
+    'Aerospace Engineering',
+    'Chemical Engineering',
+    'Civil Engineering',
+    'Biotechnology',
+    'Industrial Engineering & Management',
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +63,8 @@ export default function Register() {
       }
 
       // Create user profile in Firestore (name derived from email local-part)
-      const name = (user.email || '').split('@')[0];
       try {
-        await createUserProfile(user.uid, { email: user.email || email, name });
+        await createUserProfile(user.uid, { email: user.email || email, name, department });
       } catch (profileErr: unknown) {
         console.error('Failed to create user profile:', profileErr);
         const message = profileErr instanceof Error ? profileErr.message : String(profileErr);
@@ -96,7 +113,23 @@ export default function Register() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4 rounded-md shadow-sm">
+          <div class="space-y-4 rounded-md shadow-sm">
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Full Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="relative block w-full rounded-md border-0 px-4 py-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-brand-primary sm:text-sm sm:leading-6 bg-white/70 font-orbitron"
+                placeholder="Full Name"
+              />
+            </div>
             <div>
               <label htmlFor="email" className="sr-only">
                 Email address
@@ -112,6 +145,28 @@ export default function Register() {
                 className="relative block w-full rounded-md border-0 px-4 py-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-brand-primary sm:text-sm sm:leading-6 bg-white/70 font-orbitron"
                 placeholder="College Email address"
               />
+            </div>
+            <div>
+              <label htmlFor="department" className="sr-only">
+                Department
+              </label>
+              <select
+                id="department"
+                name="department"
+                required
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                className="relative block w-full rounded-md border-0 px-4 py-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-brand-primary sm:text-sm sm:leading-6 bg-white/70 font-orbitron"
+              >
+                <option value="" disabled>
+                  Select your department
+                </option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label htmlFor="password" className="sr-only">

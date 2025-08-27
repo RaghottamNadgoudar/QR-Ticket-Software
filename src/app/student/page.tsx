@@ -6,7 +6,7 @@ import { db, auth } from '@/lib/firebase';
 import { Event, useEventStore } from '@/lib/store';
 import { EventCard } from '@/components/EventCard';
 import { EventCart } from '@/components/EventCart';
-import { createBooking, generatePDF } from '@/lib/utils';
+import { createBooking, generatePDF, getStudentBookings } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 export default function StudentEvents() {
@@ -14,6 +14,7 @@ export default function StudentEvents() {
   const [selectedClub, setSelectedClub] = useState<string>('');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [existingBookingsCount, setExistingBookingsCount] = useState(0);
   const { selectedEvents, addEvent, removeEvent, hasEventInSlot, hasEventFromClub, canAddEvent } = useEventStore();
 
   useEffect(() => {
@@ -62,12 +63,29 @@ export default function StudentEvents() {
       }
     };
 
-    fetchEvents();
-  }, []);
+    const fetchInitialData = async () => {
+      await fetchEvents();
+      const userId = auth.currentUser?.uid;
+      if (userId) {
+        try {
+          const bookings = await getStudentBookings(userId);
+          setExistingBookingsCount(bookings.length);
+        } catch (error) {
+          console.error('Error fetching existing bookings:', error);
+          toast.error('Could not verify your existing bookings.');
+        }
+      }
+    };
+
+    fetchInitialData();
+  }, [auth.currentUser]);
 
   const filteredEvents = selectedClub
     ? events.filter(event => event.clubName === selectedClub)
     : events;
+
+  const maxEvents = Number(process.env.NEXT_PUBLIC_MAX_EVENTS_PER_DAY || 4);
+  const hasReachedBookingLimit = existingBookingsCount >= maxEvents;
 
   const handleBookEvents = async () => {
     try {
@@ -170,6 +188,12 @@ export default function StudentEvents() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3" id="events-section">
+            {hasReachedBookingLimit ? (
+              <div className="text-center py-12 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h3 className="mt-4 text-lg font-medium text-yellow-800 font-orbitron">Booking Limit Reached</h3>
+                <p className="mt-1 text-sm text-yellow-600">You have already booked the maximum number of events allowed.</p>
+              </div>
+            ) : 
             {filteredEvents.length === 0 ? (
               <div className="text-center py-12">
                 <div className="mx-auto h-12 w-12 text-gray-400">
@@ -187,7 +211,7 @@ export default function StudentEvents() {
             const isEventFull = event.currentBookings >= event.maxLimit;
             const hasSlotConflict = hasEventInSlot(event.eventSlot) && !isSelected;
             const hasClubConflict = hasEventFromClub(event.clubName) && !isSelected;
-            const cannotAdd = !canAddEvent(event) && !isSelected;
+            const cannotAdd = (!canAddEvent(event) && !isSelected) || hasReachedBookingLimit;
             
             const isDisabled = isEventFull || hasSlotConflict || hasClubConflict || cannotAdd;
             
@@ -198,6 +222,8 @@ export default function StudentEvents() {
               disabledReason = 'Slot Conflict';
             } else if (hasClubConflict) {
               disabledReason = 'Club Limit Reached';
+            } else if (hasReachedBookingLimit) {
+              disabledReason = 'Booking Limit Reached';
             } else if (cannotAdd) {
               disabledReason = 'Daily Limit Reached';
             }

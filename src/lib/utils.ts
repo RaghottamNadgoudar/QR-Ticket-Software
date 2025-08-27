@@ -101,7 +101,7 @@ export const createBooking = async (userId: string, events: Event[]) => {
       // Check if booking already exists
       const existingBooking = await getDoc(bookingRef);
       if (existingBooking.exists()) {
-        throw new Error(`You have already booked event: ${event.name}`);
+        throw new Error(`You have already registered for ${event.name}. Multiple bookings for the same event are not allowed.`);
       }
 
       const bookingData = {
