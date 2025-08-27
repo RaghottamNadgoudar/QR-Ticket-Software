@@ -20,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,18 +45,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Set cookies with secure parameters
         document.cookie = `token=${token};path=/;max-age=3600;samesite=strict;secure`;
         document.cookie = `isAdmin=${isAdmin};path=/;max-age=3600;samesite=strict;secure`;
+        
+        // Only redirect if this is not the initial load and user just signed in
+        if (!initialLoad) {
+          if (isAdmin) {
+            router.push('/admin');
+          } else {
+            router.push('/student');
+          }
+        }
       } else {
         setUser(null);
         // Clear cookies
         document.cookie = 'token=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
         document.cookie = 'isAdmin=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
-        router.push('/');
+        
+        // Only redirect to login if user was previously authenticated
+        if (!initialLoad && !loading) {
+          router.push('/');
+        }
       }
       setLoading(false);
+      setInitialLoad(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, initialLoad, loading]);
 
   const value = {
     user,

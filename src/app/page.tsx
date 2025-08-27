@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { auth } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -14,55 +14,38 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        // Check if user is admin
-        if (user.email === process.env.ADMIN_EMAIL) {
-          router.push('/admin');
-        } else {
-          router.push('/student');
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (loading) return;
+    
     setLoading(true);
 
     try {
       const adminEmail = process.env.ADMIN_EMAIL;
       
-      // Debug logs
-      console.log('Login Debug:', {
-        attemptEmail: email,
-        adminEmail,
-        isAdminAttempt: email === adminEmail,
-        allowedDomain: process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN
-      });
-      
       // Check if email domain is allowed for non-admin users
       if (email !== adminEmail && 
           !email.endsWith(`@${process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN}`)) {
         toast.error(`Only ${process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN} email addresses are allowed`);
-        setLoading(false);
         return;
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      if (user.email === process.env.ADMIN_EMAIL) {
-        router.push('/admin');
-      } else {
-        router.push('/student');
-      }
-    } catch (error) {
+      // Just sign in - let the AuthProvider handle the redirect
+      await signInWithEmailAndPassword(auth, email, password);
+      
+    } catch (error: any) {
       console.error('Error signing in:', error);
-      toast.error('Invalid credentials');
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        toast.error('Invalid email or password');
+      } else if (error.code === 'auth/invalid-email') {
+        toast.error('Please enter a valid email address');
+      } else if (error.code === 'auth/too-many-requests') {
+        toast.error('Too many failed attempts. Please try again later.');
+      } else {
+        toast.error('Sign in failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
