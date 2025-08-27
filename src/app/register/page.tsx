@@ -1,4 +1,4 @@
- 'use client';
+     'use client';
 
 import { useState } from 'react';
 import { auth } from '@/lib/firebase';
@@ -7,6 +7,7 @@ import { createUserProfile } from '@/lib/users';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -66,80 +67,103 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-b from-orange-500 to-orange-600 px-4 py-12 sm:px-6 lg:px-8">
+      {/* Corner Logos */}
+      <div className="pointer-events-none absolute left-4 top-4 sm:left-6 sm:top-6">
+        <Image
+          src="/RVCE%20Corner%20Logo%20BLACK-2%20line.png"
+          alt="RVCE logo"
+          width={320}
+          height={96}
+          className="h-16 w-auto sm:h-20"
+          priority
+        />
+      </div>
+      <div className="pointer-events-none absolute right-4 top-4 sm:right-6 sm:top-6">
+        <Image
+          src="/CCLogo_BG_Removed-Black.png"
+          alt="CC logo"
+          width={320}
+          height={96}
+          className="h-16 w-auto sm:h-20"
+          priority
+        />
+      </div>
+      <div className="w-full max-w-md">
+        <div className="text-center">
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white">
             Register for {process.env.NEXT_PUBLIC_APP_NAME}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Create your student account
-          </p>
+          <p className="mt-2 text-sm text-orange-100">Create your student account</p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="-space-y-px rounded-md shadow-sm">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="relative block w-full rounded-t-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="College Email address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="relative block w-full border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="Password"
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="relative block w-full rounded-b-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="Confirm Password"
-              />
-            </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-            >
-              {loading ? 'Registering...' : 'Register'}
-            </button>
-          </div>
-        </form>
-        <div className="text-center">
-          <Link href="/" className="text-sm text-blue-600 hover:text-blue-500">
+        <div className="mt-8 rounded-2xl bg-white p-8 shadow-xl ring-1 ring-orange-100">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="grid gap-5">
+              <div>
+                <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="relative block w-full rounded-md border-0 bg-orange-50/50 px-4 py-2.5 text-left text-gray-900 placeholder:text-gray-400 ring-1 ring-inset ring-orange-200 focus:z-10 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm [&::placeholder]:text-center"
+                  placeholder="College Email address"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="relative block w-full rounded-md border-0 bg-orange-50/50 px-4 py-2.5 text-left text-gray-900 placeholder:text-gray-400 ring-1 ring-inset ring-orange-200 focus:z-10 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm [&::placeholder]:text-center"
+                  placeholder="Password"
+                />
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-gray-700">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="relative block w-full rounded-md border-0 bg-orange-50/50 px-4 py-2.5 text-left text-gray-900 placeholder:text-gray-400 ring-1 ring-inset ring-orange-200 focus:z-10 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm [&::placeholder]:text-center"
+                  placeholder="Confirm Password"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="group relative flex w-full justify-center rounded-full bg-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 disabled:opacity-60"
+              >
+                {loading ? 'Registering...' : 'Register'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="mt-4 text-center">
+          <Link href="/" className="text-sm text-orange-100 underline underline-offset-4 hover:text-white">
             Already have an account? Sign in
           </Link>
         </div>
