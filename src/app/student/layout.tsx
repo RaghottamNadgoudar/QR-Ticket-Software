@@ -23,8 +23,8 @@ export default function StudentLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Disclosure as="nav" className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gray-50">
+      <Disclosure as="nav" className="bg-white shadow-sm border-b border-gray-200">
         {({ open }) => (
           <>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -91,8 +91,8 @@ export default function StudentLayout({
         )}
       </Disclosure>
 
-      <main className="py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
+      <main>
+        {children}
       </main>
     </div>
   );

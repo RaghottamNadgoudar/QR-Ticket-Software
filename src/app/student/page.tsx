@@ -14,7 +14,7 @@ export default function StudentEvents() {
   const [selectedClub, setSelectedClub] = useState<string>('');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const { selectedEvents, addEvent, hasEventInSlot, hasEventFromClub, canAddEvent } = useEventStore();
+  const { selectedEvents, addEvent, removeEvent, hasEventInSlot, hasEventFromClub, canAddEvent } = useEventStore();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -116,36 +116,73 @@ export default function StudentEvents() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <p className="text-gray-600 font-orbitron">Loading events...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <div className="lg:col-span-3">
-        <div className="mb-6">
-          <label htmlFor="club" className="block text-sm font-medium text-gray-700">
-            Filter by Club
-          </label>
-          <select
-            id="club"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={selectedClub}
-            onChange={(e) => setSelectedClub(e.target.value)}
-          >
-            <option key="all" value="">All Clubs</option>
-            {clubs.map((club, index) => (
-              <option key={`club-${index}`} value={club}>
-                {club}
-              </option>
-            ))}
-          </select>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 font-orbitron">Event Selection</h1>
+              <p className="mt-1 text-sm text-gray-600">Choose events for the showcase day</p>
+            </div>
+            
+            {/* Filter Section */}
+            <div className="w-full sm:w-auto sm:min-w-[240px]">
+              <label htmlFor="club" className="block text-sm font-medium text-gray-700 font-orbitron mb-2">
+                Filter by Club
+              </label>
+              <div className="relative">
+                <select
+                  id="club"
+                  className="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm text-gray-900 shadow-sm transition-colors focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 font-medium cursor-pointer"
+                  value={selectedClub}
+                  onChange={(e) => setSelectedClub(e.target.value)}
+                >
+                  <option value="">All Clubs</option>
+                  {clubs.map((club, index) => (
+                    <option key={`club-${index}`} value={club}>
+                      {club}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredEvents.map((event) => {
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3">
+            {filteredEvents.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="mx-auto h-12 w-12 text-gray-400">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-lg font-medium text-gray-900 font-orbitron">No events found</h3>
+                <p className="mt-1 text-sm text-gray-500">Try adjusting your filter or check back later.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredEvents.map((event) => {
             const isSelected = selectedEvents.some(e => e.id === event.id);
             const isEventFull = event.currentBookings >= event.maxLimit;
             const hasSlotConflict = hasEventInSlot(event.eventSlot) && !isSelected;
@@ -174,7 +211,7 @@ export default function StudentEvents() {
                 disabledReason={disabledReason}
                 onClick={() => {
                   if (isSelected) {
-                    // Remove event logic is handled in the cart
+                    removeEvent(event.id);
                   } else {
                     addEvent(event);
                   }
@@ -183,11 +220,14 @@ export default function StudentEvents() {
             );
           })}
         </div>
-      </div>
+            )}
+          </div>
 
-      <div className="lg:col-span-1">
-        <div className="sticky top-6">
-          <EventCart onBookEvents={handleBookEvents} />
+          <div className="lg:col-span-1">
+            <div className="sticky top-6">
+              <EventCart onBookEvents={handleBookEvents} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

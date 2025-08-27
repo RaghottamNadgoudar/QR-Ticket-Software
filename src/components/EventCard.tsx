@@ -22,49 +22,75 @@ export const EventCard: React.FC<EventCardProps> = ({
   return (
     <div
       className={clsx(
-        'p-4 rounded-lg shadow-md transition-all duration-200',
+        'relative overflow-hidden rounded-xl border transition-all duration-200 p-6',
         {
-          'bg-white hover:shadow-lg cursor-pointer': !disabled && !selected,
-          'bg-gray-100 cursor-not-allowed': disabled,
-          'ring-2 ring-blue-500 bg-blue-50': selected,
+          'bg-white border-gray-200 hover:shadow-lg hover:border-gray-300 cursor-pointer': !disabled && !selected,
+          'bg-gray-50 border-gray-200 cursor-not-allowed opacity-60': disabled,
+          'bg-orange-50 border-orange-300 ring-2 ring-orange-500 ring-opacity-50 cursor-pointer hover:bg-orange-100': selected,
         }
       )}
       onClick={!disabled ? onClick : undefined}
     >
-      <h3 className="text-lg font-semibold text-gray-900">{event.name}</h3>
-      <p className="text-sm text-gray-600 mt-1">Venue: {event.venue}</p>
-      <p className="text-sm text-gray-600">Club: {event.clubName}</p>
-      <p className="text-sm text-gray-600">Slot: {event.eventSlot}</p>
+      {/* Event Name */}
+      <h3 className="text-xl font-bold text-gray-900 font-orbitron mb-3">{event.name}</h3>
+      
+      {/* Event Details */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center text-sm text-gray-600">
+          <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span className="font-medium">{event.venue}</span>
+        </div>
+        
+        <div className="flex items-center text-sm text-gray-600">
+          <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span className="font-medium">{event.clubName}</span>
+        </div>
+        
+        <div className="flex items-center text-sm text-gray-600">
+          <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="font-medium">Slot {event.eventSlot}</span>
+        </div>
+      </div>
       
       {event.description && (
-        <p className="text-sm text-gray-600 mt-2">{event.description}</p>
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{event.description}</p>
       )}
       
-      <div className="mt-3 flex justify-between items-center">
+      {/* Footer */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
         <span
           className={clsx(
-            'px-2 py-1 rounded text-sm',
+            'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
             availableSeats > 10
-              ? 'bg-green-100 text-green-800'
+              ? 'bg-green-100 text-green-700'
               : availableSeats > 0
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-red-100 text-red-800'
+              ? 'bg-yellow-100 text-yellow-700'
+              : 'bg-red-100 text-red-700'
           )}
         >
           {availableSeats} seats left
         </span>
         
-        {selected && (
-          <span className="text-blue-600 text-sm font-medium">
-            Selected
-          </span>
-        )}
-        
-        {disabled && disabledReason && (
-          <span className="text-red-600 text-xs font-medium">
-            {disabledReason}
-          </span>
-        )}
+        <div className="flex items-center justify-end space-x-2">
+          {selected && (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+              ✓ Selected
+            </span>
+          )}
+          
+          {disabled && disabledReason && (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+              {disabledReason}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
