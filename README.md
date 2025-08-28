@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RVCE Event Ticketing
+
+This is an open-source event ticketing software designed for RVCE, built with Next.js and Firebase. It provides a comprehensive solution for creating events, managing registrations, and tracking attendance using QR codes.
+
+## Features
+
+- **Event Management**: Admins can create, update, and delete events.
+- **User Registration**: Students can register for events and receive a unique QR code ticket via email.
+- **QR Code Ticketing**: Each registration generates a unique QR code for attendance tracking.
+- **Attendance Tracking**: Attendance takers can scan QR codes to mark attendees.
+- **Admin Dashboard**: A dedicated dashboard for managing events and viewing registration data.
+- **Email Notifications**: Automated email notifications for event registration and ticket delivery.
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Backend**: [Firebase](https://firebase.google.com/) (Authentication, Firestore, Storage)
+- **QR Code Generation**: [qrcode](https://www.npmjs.com/package/qrcode)
+- **QR Code Scanning**: [qr-scanner](https://www.npmjs.com/package/qr-scanner)
+- **PDF Generation**: [jspdf](https://www.npmjs.com/package/jspdf)
 
 ## Getting Started
 
-First, run the development server:
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Prerequisites
+
+- Node.js (v18 or later)
+- npm, yarn, or pnpm
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/QR-Ticket-Software.git
+    cd QR-Ticket-Software
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+### Configuration
+
+1.  **Set up Firebase:**
+    - Create a new project on the [Firebase Console](https://console.firebase.google.com/).
+    - Set up Firestore, Firebase Storage, and Firebase Authentication.
+    - Obtain your Firebase project configuration credentials.
+    - Download your Firebase Admin SDK service account key (`serviceAccount.json`).
+
+2.  **Create a `.env.local` file:**
+    Create a file named `.env.local` in the root of the project and add the following environment variables. Replace the placeholder values with your actual credentials.
+
+    ```env
+    # Firebase Configuration (from your Firebase console)
+    NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+    NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+    # Application Configuration
+    NEXT_PUBLIC_APP_NAME=RVCE Event Ticketing
+
+    # Email Configuration (e.g., Gmail SMTP)
+    EMAIL_HOST=smtp.gmail.com
+    EMAIL_PORT=587
+    EMAIL_USER=your_email@gmail.com
+    EMAIL_PASSWORD=your_app_password
+
+    # Admin Credentials
+    ADMIN_EMAIL=your_admin_email@example.com
+    ADMIN_PASSWORD=your_strong_admin_password
+
+    # Firebase Admin SDK Configuration
+    # Place your serviceAccount.json file in the root of the project
+    GOOGLE_APPLICATION_CREDENTIALS=./serviceAccount.json
+    ```
+
+3.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Admin**: Access the admin dashboard at `/admin` to manage events.
+- **Students**: Register for events through the main page.
+- **Attendance Takers**: Log in and use the scanning interface to validate tickets.
 
-## Learn More
+## Contributing
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributions are welcome! Please feel free to open an issue or submit a pull request.
